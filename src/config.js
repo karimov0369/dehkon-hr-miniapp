@@ -1,1 +1,1 @@
-export const SUPER_ADMIN_TELEGRAM_ID = "local_528230";
+export const SUPER_ADMIN_TELEGRAM_ID = "908430198";
