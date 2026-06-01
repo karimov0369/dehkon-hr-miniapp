@@ -535,6 +535,7 @@ function loadMedicines() {
 
   return saved.map((medicine) => ({
     ...medicine,
+    image: medicine.image || "",
     cardImage: medicine.cardImage || ""
   }));
 }
@@ -570,6 +571,14 @@ function searchMedicines(query) {
 
     return haystack.includes(normalizedQuery);
   });
+}
+
+function getMedicineImageHtml(medicine, className = "") {
+  if (medicine?.image) {
+    return `<img src="${medicine.image}" alt="${escapeText(medicine.name)}" class="${className}" />`;
+  }
+
+  return `<div class="medicine-detail-placeholder ${className}">💊</div>`;
 }
 
 /* Test results and pharmacist rating */
@@ -791,15 +800,9 @@ function renderHome() {
           Dehkon <span>HR</span><br />
           Akademiya
         </h1>
-
-        <p class="subtitle">
-          Bilim, intizom va natija — muvaffaqiyat kaliti!
-        </p>
-
-        <div class="divider"></div>
       </section>
 
-      <section class="direction-buttons">
+      <section class="direction-buttons direction-buttons-raised">
         <button class="direction-btn blue" data-direction="bozor">
           <img src="${BASE_URL}assets/bozor.png" alt="Dehkon Bozor" />
         </button>
@@ -811,6 +814,14 @@ function renderHome() {
         <button class="direction-btn red" data-direction="supermarket">
           <img src="${BASE_URL}assets/supermarket2.png" alt="Dehkon Supermarket" />
         </button>
+      </section>
+
+      <section class="home-bottom-slogan">
+        <p class="subtitle">
+          Bilim, intizom va natija — muvaffaqiyat kaliti!
+        </p>
+
+        <div class="divider"></div>
       </section>
     </main>
   `;
@@ -1166,6 +1177,99 @@ function renderMenuDetail() {
 
 /* Medicine page */
 
+function renderMedicineRows(medicines) {
+  if (!medicines.length) {
+    return `
+      <div class="medicine-empty">
+        <div>🔎</div>
+        <h3>Natija topilmadi</h3>
+        <p>Boshqa nom bilan qidirib ko‘ring yoki admin yangi dori qo‘shishi mumkin.</p>
+      </div>
+    `;
+  }
+
+  return medicines
+    .map(
+      (medicine) => `
+        <div class="medicine-row-wrap">
+          <button class="medicine-row" data-medicine="${medicine.id}">
+            <div class="medicine-row-photo">
+              ${
+                medicine.image
+                  ? `<img src="${medicine.image}" alt="${escapeText(medicine.name)}" />`
+                  : medicine.cardImage
+                    ? `<img src="${medicine.cardImage}" alt="${escapeText(medicine.name)}" />`
+                    : `<span>💊</span>`
+              }
+            </div>
+
+            <div class="medicine-row-content">
+              <h4>${escapeText(medicine.name)}</h4>
+              <p>${escapeText(medicine.category || medicine.composition || "")}</p>
+              ${
+                medicine.cardImage
+                  ? `<small>📋 Kartochka mavjud</small>`
+                  : ""
+              }
+            </div>
+
+            <div class="medicine-row-arrow">›</div>
+          </button>
+
+          ${
+            isAdmin()
+              ? `
+                <div class="row-admin-controls">
+                  <button data-edit-medicine="${medicine.id}">Tahrirlash</button>
+                  <button data-delete-medicine="${medicine.id}" class="danger">O‘chirish</button>
+                </div>
+              `
+              : ""
+          }
+        </div>
+      `
+    )
+    .join("");
+}
+
+function attachMedicineRowEvents(item) {
+  document.querySelectorAll("[data-medicine]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedMedicineId = button.dataset.medicine;
+      navigate("medicineDetail");
+    });
+  });
+
+  if (isAdmin()) {
+    document.querySelectorAll("[data-edit-medicine]").forEach((button) => {
+      button.addEventListener("click", () => {
+        editingMedicineId = button.dataset.editMedicine;
+        navigate("medicineForm");
+      });
+    });
+
+    document.querySelectorAll("[data-delete-medicine]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!confirm("Dori bazadan o‘chirilsinmi?")) return;
+
+        const medicineId = button.dataset.deleteMedicine;
+        const medicines = loadMedicines().filter((medicine) => medicine.id !== medicineId);
+
+        saveMedicines(medicines);
+        showToast("Dori o‘chirildi.");
+
+        const query = document.getElementById("medicineSearchInput")?.value || "";
+        const list = document.getElementById("medicineList");
+
+        if (list) {
+          list.innerHTML = renderMedicineRows(searchMedicines(query));
+          attachMedicineRowEvents(item);
+        }
+      });
+    });
+  }
+}
+
 function renderMedicinePage(item) {
   const query = sessionStorage.getItem("dehkon_medicine_search") || "";
   const medicines = searchMedicines(query);
@@ -1189,6 +1293,8 @@ function renderMedicinePage(item) {
           id="medicineSearchInput"
           placeholder="Dori nomini kiriting..."
           value="${escapeText(query)}"
+          autocomplete="off"
+          inputmode="search"
         />
       </section>
 
@@ -1202,59 +1308,8 @@ function renderMedicinePage(item) {
           : ""
       }
 
-      <section class="medicine-list">
-        ${
-          medicines.length
-            ? medicines
-                .map(
-                  (medicine) => `
-                    <div class="medicine-row-wrap">
-                      <button class="medicine-row" data-medicine="${medicine.id}">
-                        <div class="medicine-row-photo">
-                          ${
-                            medicine.image
-                              ? `<img src="${medicine.image}" alt="${escapeText(medicine.name)}" />`
-                              : medicine.cardImage
-                                ? `<img src="${medicine.cardImage}" alt="${escapeText(medicine.name)}" />`
-                                : `<span>💊</span>`
-                          }
-                        </div>
-
-                        <div class="medicine-row-content">
-                          <h4>${escapeText(medicine.name)}</h4>
-                          <p>${escapeText(medicine.category || medicine.composition || "")}</p>
-                          ${
-                            medicine.cardImage
-                              ? `<small>📋 Kartochka mavjud</small>`
-                              : ""
-                          }
-                        </div>
-
-                        <div class="medicine-row-arrow">›</div>
-                      </button>
-
-                      ${
-                        isAdmin()
-                          ? `
-                            <div class="row-admin-controls">
-                              <button data-edit-medicine="${medicine.id}">Tahrirlash</button>
-                              <button data-delete-medicine="${medicine.id}" class="danger">O‘chirish</button>
-                            </div>
-                          `
-                          : ""
-                      }
-                    </div>
-                  `
-                )
-                .join("")
-            : `
-              <div class="medicine-empty">
-                <div>🔎</div>
-                <h3>Natija topilmadi</h3>
-                <p>Boshqa nom bilan qidirib ko‘ring yoki admin yangi dori qo‘shishi mumkin.</p>
-              </div>
-            `
-        }
+      <section class="medicine-list" id="medicineList">
+        ${renderMedicineRows(medicines)}
       </section>
 
       ${renderBottomNav("home")}
@@ -1263,45 +1318,26 @@ function renderMedicinePage(item) {
 
   attachTopBackButton();
   attachBottomNavEvents();
+  attachMedicineRowEvents(item);
 
   const searchInput = document.getElementById("medicineSearchInput");
+  const list = document.getElementById("medicineList");
 
   searchInput.addEventListener("input", (event) => {
-    sessionStorage.setItem("dehkon_medicine_search", event.target.value);
-    renderMedicinePage(item);
-  });
+    const value = event.target.value;
 
-  document.querySelectorAll("[data-medicine]").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedMedicineId = button.dataset.medicine;
-      navigate("medicineDetail");
-    });
+    sessionStorage.setItem("dehkon_medicine_search", value);
+
+    if (list) {
+      list.innerHTML = renderMedicineRows(searchMedicines(value));
+      attachMedicineRowEvents(item);
+    }
   });
 
   if (isAdmin()) {
     document.getElementById("addMedicineBtn").addEventListener("click", () => {
       editingMedicineId = null;
       navigate("medicineForm");
-    });
-
-    document.querySelectorAll("[data-edit-medicine]").forEach((button) => {
-      button.addEventListener("click", () => {
-        editingMedicineId = button.dataset.editMedicine;
-        navigate("medicineForm");
-      });
-    });
-
-    document.querySelectorAll("[data-delete-medicine]").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (!confirm("Dori bazadan o‘chirilsinmi?")) return;
-
-        const medicineId = button.dataset.deleteMedicine;
-        const medicines = loadMedicines().filter((medicine) => medicine.id !== medicineId);
-
-        saveMedicines(medicines);
-        showToast("Dori o‘chirildi.");
-        renderMedicinePage(item);
-      });
     });
   }
 }
@@ -1330,6 +1366,17 @@ function renderMedicineDetail() {
         ${
           medicine.category
             ? `<p class="medicine-category">${escapeText(medicine.category)}</p>`
+            : ""
+        }
+
+        ${
+          isAdmin() && !medicine.image
+            ? `
+              <div class="medicine-admin-hint">
+                <p>Bu doriga rasm qo‘shilmagan.</p>
+                <button id="addCurrentMedicineImage" class="secondary-btn">Rasm qo‘shish</button>
+              </div>
+            `
             : ""
         }
 
@@ -1381,6 +1428,15 @@ function renderMedicineDetail() {
       editingMedicineId = medicine.id;
       navigate("medicineForm");
     });
+
+    const addImageButton = document.getElementById("addCurrentMedicineImage");
+
+    if (addImageButton) {
+      addImageButton.addEventListener("click", () => {
+        editingMedicineId = medicine.id;
+        navigate("medicineForm");
+      });
+    }
   }
 }
 
@@ -1490,7 +1546,7 @@ function renderMedicineForm() {
             ${
               selectedMedicineImageData
                 ? `<img src="${selectedMedicineImageData}" class="material-image-preview" />`
-                : ""
+                : `<div class="image-empty-preview">Dori rasmi hali tanlanmagan</div>`
             }
           </div>
 
@@ -1503,7 +1559,7 @@ function renderMedicineForm() {
             ${
               selectedMedicineCardImageData
                 ? `<img src="${selectedMedicineCardImageData}" class="medicine-card-preview" />`
-                : ""
+                : `<div class="image-empty-preview">Kartochka rasmi hali tanlanmagan</div>`
             }
           </div>
 
@@ -1642,7 +1698,7 @@ function renderBirthdaysPage(item) {
         <div class="birthday-hero-icon">🎂</div>
         <div>
           <h3>Tug‘ilgan kunlar</h3>
-          <p>Yaqin kunlarda tug‘ilgan kuni bo‘ladigan xodimlar shu yerda ko‘rinadi.</p>
+          <p>Ro‘yxatdan o‘tgan xodimlar va yaqin tug‘ilgan kunlar shu yerda ko‘rinadi.</p>
         </div>
       </section>
 
@@ -1698,6 +1754,10 @@ function renderBirthdaysPage(item) {
               </div>
             `
         }
+      </section>
+
+      <section class="local-storage-note">
+        <b>Ma’lumot:</b> hozircha foydalanuvchilar shu qurilma xotirasidan olinadi. Hamma xodimlar bir-birini ko‘rishi uchun umumiy baza ulanadi.
       </section>
 
       ${renderBottomNav("home")}

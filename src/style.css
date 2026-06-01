@@ -57,6 +57,8 @@ img {
   position: relative;
   overflow: hidden;
   color: #ffffff;
+  display: flex;
+  flex-direction: column;
 }
 
 .landing-page::before {
@@ -70,7 +72,8 @@ img {
 }
 
 .hero,
-.direction-buttons {
+.direction-buttons,
+.home-bottom-slogan {
   position: relative;
   z-index: 2;
 }
@@ -118,7 +121,7 @@ img {
   line-height: 1.14;
   font-weight: 800;
   letter-spacing: -1.2px;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .hero h1 span {
@@ -131,6 +134,7 @@ img {
   color: rgba(255, 255, 255, 0.9);
   max-width: 380px;
   margin: 0 auto;
+  text-align: center;
 }
 
 .divider {
@@ -142,11 +146,21 @@ img {
   box-shadow: 0 0 14px rgba(59, 124, 255, 0.9);
 }
 
+/* Raised direction buttons */
 .direction-buttons {
-  margin-top: 92px;
+  margin-top: 56px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.direction-buttons-raised {
+  margin-top: 50px;
+}
+
+.home-bottom-slogan {
+  margin-top: auto;
+  padding: 28px 0 4px;
 }
 
 .direction-btn {
@@ -1072,10 +1086,11 @@ textarea:focus {
 
 .medicine-detail-image {
   width: 100%;
-  max-height: 240px;
-  object-fit: cover;
+  max-height: 260px;
+  object-fit: contain;
   border-radius: 20px;
   margin-bottom: 18px;
+  background: #f8fafc;
 }
 
 .medicine-detail-placeholder {
@@ -1102,6 +1117,28 @@ textarea:focus {
   color: #7c3aed;
   font-weight: 900;
   margin-bottom: 18px;
+}
+
+.medicine-admin-hint {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.medicine-admin-hint p {
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.medicine-admin-hint .secondary-btn {
+  background: #ffedd5;
+  color: #9a3412;
 }
 
 .medicine-card-image-box {
@@ -1157,6 +1194,22 @@ textarea:focus {
   font-size: 14px;
   color: #374151;
   line-height: 1.55;
+}
+
+.image-empty-preview {
+  width: 100%;
+  min-height: 72px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 /* Birthdays */
@@ -1307,6 +1360,17 @@ textarea:focus {
 .empty-birthday-card p {
   color: #6b7280;
   font-size: 14px;
+}
+
+.local-storage-note {
+  margin-top: 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: 16px;
+  padding: 13px 14px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* Material detail */
@@ -2018,7 +2082,15 @@ textarea:focus {
   }
 
   .direction-buttons {
-    margin-top: 70px;
+    margin-top: 42px;
+  }
+
+  .direction-buttons-raised {
+    margin-top: 38px;
+  }
+
+  .home-bottom-slogan {
+    padding-bottom: 2px;
   }
 
   .direction-btn {
