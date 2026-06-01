@@ -4,6 +4,7 @@ import { SUPER_ADMIN_TELEGRAM_ID } from "./config.js";
 const tg = window.Telegram?.WebApp;
 const app = document.getElementById("app");
 const BASE_URL = import.meta.env.BASE_URL;
+const MAIN_LOGO = `${BASE_URL}assets/main-logo.png`;
 
 if (tg) {
   tg.ready();
@@ -337,11 +338,38 @@ function getDefaultContent() {
     lessons: {
       materials: [
         {
-          id: "lesson_intro",
-          title: "Kirish darsi",
-          description: "Akademiya bilan tanishuv",
-          text: "Bu yerda birinchi dars matni, rasm yoki video bo‘lishi mumkin.",
-          icon: "🎓",
+          id: "lesson_medicines",
+          title: "Dori vositalari",
+          description: "Dorilar bo‘yicha o‘quv materiallari",
+          text: "Bu bo‘limda dori vositalari bo‘yicha darslar, qo‘llanmalar va video materiallar joylanadi.",
+          icon: "💊",
+          image: "",
+          videoUrl: ""
+        },
+        {
+          id: "lesson_supplements",
+          title: "Biologik faol qo‘shimchalar",
+          description: "BFQ mahsulotlari bo‘yicha darslar",
+          text: "Bu bo‘limda biologik faol qo‘shimchalar haqida ma’lumotlar, tavsiyalar va darslar joylanadi.",
+          icon: "🌿",
+          image: "",
+          videoUrl: ""
+        },
+        {
+          id: "lesson_sport_pit",
+          title: "Sport Pit",
+          description: "Sport oziqlanishi bo‘yicha darslar",
+          text: "Bu bo‘limda sport oziqlanishi, proteinlar, vitaminlar va sport mahsulotlari haqida darslar joylanadi.",
+          icon: "🏋️",
+          image: "",
+          videoUrl: ""
+        },
+        {
+          id: "lesson_cosmetics",
+          title: "Kosmetika",
+          description: "Kosmetika mahsulotlari bo‘yicha darslar",
+          text: "Bu bo‘limda kosmetika mahsulotlari, parvarish vositalari va mijozga tavsiya berish bo‘yicha darslar joylanadi.",
+          icon: "💄",
           image: "",
           videoUrl: ""
         }
@@ -421,6 +449,22 @@ function loadContent() {
       if (!saved[directionKey][sectionKey]) {
         saved[directionKey][sectionKey] = defaults[directionKey][sectionKey];
       }
+    }
+
+    const lessons = saved[directionKey]?.lessons?.materials || [];
+
+    const hasOnlyOldIntro =
+      lessons.length === 1 &&
+      lessons[0]?.id === "lesson_intro";
+
+    const hasNoNewLessons =
+      !lessons.some((item) => item.id === "lesson_medicines") &&
+      !lessons.some((item) => item.id === "lesson_supplements") &&
+      !lessons.some((item) => item.id === "lesson_sport_pit") &&
+      !lessons.some((item) => item.id === "lesson_cosmetics");
+
+    if (hasOnlyOldIntro || hasNoNewLessons) {
+      saved[directionKey].lessons = defaults[directionKey].lessons;
     }
   }
 
@@ -571,14 +615,6 @@ function searchMedicines(query) {
 
     return haystack.includes(normalizedQuery);
   });
-}
-
-function getMedicineImageHtml(medicine, className = "") {
-  if (medicine?.image) {
-    return `<img src="${medicine.image}" alt="${escapeText(medicine.name)}" class="${className}" />`;
-  }
-
-  return `<div class="medicine-detail-placeholder ${className}">💊</div>`;
 }
 
 /* Test results and pharmacist rating */
@@ -983,14 +1019,14 @@ function renderMainMenu() {
     <main class="app-page light-page">
       ${renderTopBar(direction.title)}
 
-      <section class="top-banner" style="background:${direction.color}">
-        <div>
-          <img src="${direction.logo}" alt="${direction.title}" class="banner-logo" />
-          <p>${direction.subtitle}</p>
+      <section class="top-banner universal-main-banner">
+        <div class="universal-logo-wrap">
+          <img src="${MAIN_LOGO}" alt="Dehkon" class="universal-main-logo" />
         </div>
 
-        <div class="banner-illustration">
-          🎓
+        <div class="universal-banner-text">
+          <h3>${escapeText(direction.title)}</h3>
+          <p>${escapeText(direction.subtitle)}</p>
         </div>
       </section>
 
@@ -1175,7 +1211,7 @@ function renderMenuDetail() {
   }
 }
 
-/* Medicine page */
+/* Medicine */
 
 function renderMedicineRows(medicines) {
   if (!medicines.length) {
@@ -2046,6 +2082,394 @@ function renderTestsPage(item, sectionContent, direction) {
   }
 }
 
+function renderTestForm() {
+  if (!isAdmin()) {
+    showToast("Sizda admin huquqi yo‘q.");
+    goBack();
+    return;
+  }
+
+  const content = loadContent();
+  const directionKey = getSelectedDirection();
+  const tests = content[directionKey].tests.tests || [];
+  const test = editingTestId
+    ? tests.find((entry) => entry.id === editingTestId)
+    : null;
+
+  const questions = test?.questions?.length
+    ? test.questions
+    : [
+        {
+          question: "",
+          options: ["", "", "", ""],
+          correctIndex: 0
+        }
+      ];
+
+  app.innerHTML = `
+    <main class="app-page light-page">
+      ${renderTopBar(test ? "Testni tahrirlash" : "Test qo‘shish")}
+
+      <section class="profile-card">
+        <form id="testForm" class="form">
+          <label>
+            Test nomi
+            <input
+              type="text"
+              name="title"
+              value="${escapeText(test?.title || "")}"
+              placeholder="Masalan: Farmatsevtlar uchun test"
+              required
+            />
+          </label>
+
+          <label>
+            Qisqa izoh
+            <input
+              type="text"
+              name="description"
+              value="${escapeText(test?.description || "")}"
+              placeholder="Masalan: Dorilar bo‘yicha bilimni tekshirish"
+            />
+          </label>
+
+          <div class="test-builder-head">
+            <h3>Savollar</h3>
+            <p>To‘g‘ri javobni faqat admin ko‘radi. Oddiy foydalanuvchilar test paytida faqat variantlarni ko‘radi.</p>
+          </div>
+
+          <div id="questionsBuilder" class="questions-builder">
+            ${questions.map((question, index) => renderQuestionBuilderCard(question, index)).join("")}
+          </div>
+
+          <button type="button" id="addQuestionBtn" class="secondary-btn">
+            ＋ Savol qo‘shish
+          </button>
+
+          <button type="submit" class="primary-btn">
+            Saqlash
+          </button>
+        </form>
+      </section>
+    </main>
+  `;
+
+  attachTopBackButton();
+  attachTestBuilderEvents();
+
+  document.getElementById("addQuestionBtn").addEventListener("click", () => {
+    const builder = document.getElementById("questionsBuilder");
+    const index = builder.querySelectorAll("[data-question-card]").length;
+
+    builder.insertAdjacentHTML(
+      "beforeend",
+      renderQuestionBuilderCard(
+        {
+          question: "",
+          options: ["", "", "", ""],
+          correctIndex: 0
+        },
+        index
+      )
+    );
+
+    attachTestBuilderEvents();
+  });
+
+  document.getElementById("testForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const questionCards = document.querySelectorAll("[data-question-card]");
+    const savedQuestions = [];
+
+    for (const card of questionCards) {
+      const questionInput = card.querySelector("[data-question-input]");
+      const optionInputs = card.querySelectorAll("[data-option-input]");
+      const correctInput = card.querySelector("[data-correct-radio]:checked");
+
+      const questionText = questionInput.value.trim();
+      const options = Array.from(optionInputs)
+        .map((input) => input.value.trim())
+        .filter(Boolean);
+
+      if (!questionText) {
+        showToast("Savol matnini kiriting.");
+        return;
+      }
+
+      if (options.length < 2) {
+        showToast("Har bir savolda kamida 2 ta javob varianti bo‘lishi kerak.");
+        return;
+      }
+
+      const selectedCorrectIndex = Number(correctInput?.value || 0);
+
+      if (selectedCorrectIndex >= options.length) {
+        showToast("To‘g‘ri javob varianti noto‘g‘ri tanlangan.");
+        return;
+      }
+
+      savedQuestions.push({
+        question: questionText,
+        options,
+        correctIndex: selectedCorrectIndex
+      });
+    }
+
+    const savedTest = {
+      id: test?.id || createId("test"),
+      title: formData.get("title").trim(),
+      description: formData.get("description").trim(),
+      questions: savedQuestions,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (test) {
+      const index = tests.findIndex((entry) => entry.id === test.id);
+      tests[index] = savedTest;
+    } else {
+      tests.push(savedTest);
+    }
+
+    content[directionKey].tests.tests = tests;
+    saveContent(content);
+
+    selectedTestId = savedTest.id;
+    showToast("Test saqlandi.");
+    navigate("menuDetail", { replace: true });
+  });
+}
+
+function renderQuestionBuilderCard(question, questionIndex) {
+  const options = question.options?.length ? question.options : ["", "", "", ""];
+  const correctIndex = Number(question.correctIndex || 0);
+
+  return `
+    <div class="question-builder-card" data-question-card>
+      <div class="question-builder-top">
+        <h4>Savol ${questionIndex + 1}</h4>
+
+        <button type="button" class="question-delete-btn" data-delete-question>
+          O‘chirish
+        </button>
+      </div>
+
+      <label>
+        Savol matni
+        <textarea
+          data-question-input
+          rows="3"
+          placeholder="Savolni yozing..."
+          required
+        >${escapeText(question.question || "")}</textarea>
+      </label>
+
+      <div class="options-builder" data-options-builder>
+        ${options.map((option, optionIndex) =>
+          renderOptionBuilderRow(option, optionIndex, correctIndex)
+        ).join("")}
+      </div>
+
+      <button type="button" class="add-option-btn" data-add-option>
+        ＋ Javob varianti qo‘shish
+      </button>
+
+      <div class="correct-answer-note">
+        ✅ To‘g‘ri javobni tanlang. Bu belgi faqat admin tahrirlash oynasida ko‘rinadi.
+      </div>
+    </div>
+  `;
+}
+
+function renderOptionBuilderRow(option, optionIndex, correctIndex) {
+  return `
+    <div class="option-builder-row" data-option-row>
+      <label class="correct-radio-label">
+        <input
+          type="radio"
+          name="correct_temp"
+          value="${optionIndex}"
+          data-correct-radio
+          ${optionIndex === correctIndex ? "checked" : ""}
+        />
+        <span>To‘g‘ri</span>
+      </label>
+
+      <input
+        type="text"
+        data-option-input
+        value="${escapeText(option || "")}"
+        placeholder="Javob varianti"
+        required
+      />
+
+      <button type="button" class="option-delete-btn" data-delete-option>
+        ×
+      </button>
+    </div>
+  `;
+}
+
+function refreshQuestionBuilderNumbers() {
+  document.querySelectorAll("[data-question-card]").forEach((card, questionIndex) => {
+    const title = card.querySelector(".question-builder-top h4");
+
+    if (title) {
+      title.textContent = `Savol ${questionIndex + 1}`;
+    }
+
+    const radios = card.querySelectorAll("[data-correct-radio]");
+    const uniqueName = `correct_question_${questionIndex}`;
+
+    radios.forEach((radio, optionIndex) => {
+      radio.name = uniqueName;
+      radio.value = String(optionIndex);
+    });
+  });
+}
+
+function attachTestBuilderEvents() {
+  refreshQuestionBuilderNumbers();
+
+  document.querySelectorAll("[data-delete-question]").forEach((button) => {
+    button.onclick = () => {
+      const cards = document.querySelectorAll("[data-question-card]");
+
+      if (cards.length <= 1) {
+        showToast("Kamida bitta savol bo‘lishi kerak.");
+        return;
+      }
+
+      button.closest("[data-question-card]")?.remove();
+      refreshQuestionBuilderNumbers();
+    };
+  });
+
+  document.querySelectorAll("[data-add-option]").forEach((button) => {
+    button.onclick = () => {
+      const card = button.closest("[data-question-card]");
+      const optionsBuilder = card?.querySelector("[data-options-builder]");
+
+      if (!card || !optionsBuilder) return;
+
+      const optionCount = optionsBuilder.querySelectorAll("[data-option-row]").length;
+
+      optionsBuilder.insertAdjacentHTML(
+        "beforeend",
+        renderOptionBuilderRow("", optionCount, -1)
+      );
+
+      attachTestBuilderEvents();
+    };
+  });
+
+  document.querySelectorAll("[data-delete-option]").forEach((button) => {
+    button.onclick = () => {
+      const card = button.closest("[data-question-card]");
+      const optionRows = card?.querySelectorAll("[data-option-row]") || [];
+
+      if (optionRows.length <= 2) {
+        showToast("Kamida 2 ta javob varianti bo‘lishi kerak.");
+        return;
+      }
+
+      const row = button.closest("[data-option-row]");
+      const wasCorrect = row?.querySelector("[data-correct-radio]")?.checked;
+
+      row?.remove();
+
+      const firstRadio = card?.querySelector("[data-correct-radio]");
+
+      if (wasCorrect && firstRadio) {
+        firstRadio.checked = true;
+      }
+
+      refreshQuestionBuilderNumbers();
+    };
+  });
+}
+
+function renderTakeTest() {
+  const content = loadContent();
+  const directionKey = getSelectedDirection();
+  const test = content[directionKey].tests.tests.find((entry) => entry.id === selectedTestId);
+
+  if (!test) {
+    goBack();
+    return;
+  }
+
+  app.innerHTML = `
+    <main class="app-page light-page">
+      ${renderTopBar(test.title)}
+
+      <section class="profile-card">
+        <h3>${escapeText(test.title)}</h3>
+        <p class="muted">${escapeText(test.description || "")}</p>
+
+        <form id="takeTestForm" class="test-form">
+          ${test.questions
+            .map(
+              (question, questionIndex) => `
+                <div class="question-card">
+                  <h4>${questionIndex + 1}. ${escapeText(question.question)}</h4>
+
+                  ${question.options
+                    .map(
+                      (option, optionIndex) => `
+                        <label class="answer-option">
+                          <input
+                            type="radio"
+                            name="question_${questionIndex}"
+                            value="${optionIndex}"
+                            required
+                          />
+                          <span>${escapeText(option)}</span>
+                        </label>
+                      `
+                    )
+                    .join("")}
+                </div>
+              `
+            )
+            .join("")}
+
+          <button type="submit" class="primary-btn">
+            Testni yakunlash
+          </button>
+        </form>
+      </section>
+    </main>
+  `;
+
+  attachTopBackButton();
+
+  document.getElementById("takeTestForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    let correct = 0;
+
+    test.questions.forEach((question, questionIndex) => {
+      const answer = Number(formData.get(`question_${questionIndex}`));
+
+      if (answer === Number(question.correctIndex)) {
+        correct += 1;
+      }
+    });
+
+    createTestResult({
+      test,
+      correct,
+      total: test.questions.length
+    });
+
+    showToast(`Natija: ${correct}/${test.questions.length}`);
+    navigate("testResults", { replace: true });
+  });
+}
+
 /* Material detail/form */
 
 function renderMaterialDetail() {
@@ -2243,199 +2667,6 @@ function renderMaterialForm() {
 
     selectedMaterialId = savedMaterial.id;
     navigate("materialDetail", { replace: true });
-  });
-}
-
-/* Test form/take */
-
-function renderTestForm() {
-  if (!isAdmin()) {
-    showToast("Sizda admin huquqi yo‘q.");
-    goBack();
-    return;
-  }
-
-  const content = loadContent();
-  const directionKey = getSelectedDirection();
-  const tests = content[directionKey].tests.tests || [];
-  const test = editingTestId
-    ? tests.find((entry) => entry.id === editingTestId)
-    : null;
-
-  const defaultQuestions = test?.questions?.length
-    ? JSON.stringify(test.questions, null, 2)
-    : JSON.stringify(
-        [
-          {
-            question: "Savol matni?",
-            options: ["A javob", "B javob", "C javob", "D javob"],
-            correctIndex: 0
-          }
-        ],
-        null,
-        2
-      );
-
-  app.innerHTML = `
-    <main class="app-page light-page">
-      ${renderTopBar(test ? "Testni tahrirlash" : "Test qo‘shish")}
-
-      <section class="profile-card">
-        <form id="testForm" class="form">
-          <label>
-            Test nomi
-            <input
-              type="text"
-              name="title"
-              value="${escapeText(test?.title || "")}"
-              required
-            />
-          </label>
-
-          <label>
-            Qisqa izoh
-            <input
-              type="text"
-              name="description"
-              value="${escapeText(test?.description || "")}"
-            />
-          </label>
-
-          <label>
-            Savollar JSON formatda
-            <textarea name="questions" rows="14" required>${escapeText(defaultQuestions)}</textarea>
-          </label>
-
-          <div class="help-card">
-            Format:
-            <br />
-            correctIndex — to‘g‘ri javob raqami, 0 dan boshlanadi.
-          </div>
-
-          <button type="submit" class="primary-btn">
-            Saqlash
-          </button>
-        </form>
-      </section>
-    </main>
-  `;
-
-  attachTopBackButton();
-
-  document.getElementById("testForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-
-    let questions;
-
-    try {
-      questions = JSON.parse(formData.get("questions"));
-    } catch {
-      showToast("Savollar JSON formatida xato bor.");
-      return;
-    }
-
-    const savedTest = {
-      id: test?.id || createId("test"),
-      title: formData.get("title").trim(),
-      description: formData.get("description").trim(),
-      questions,
-      updatedAt: new Date().toISOString()
-    };
-
-    if (test) {
-      const index = tests.findIndex((entry) => entry.id === test.id);
-      tests[index] = savedTest;
-    } else {
-      tests.push(savedTest);
-    }
-
-    content[directionKey].tests.tests = tests;
-    saveContent(content);
-
-    selectedTestId = savedTest.id;
-    navigate("menuDetail", { replace: true });
-  });
-}
-
-function renderTakeTest() {
-  const content = loadContent();
-  const directionKey = getSelectedDirection();
-  const test = content[directionKey].tests.tests.find((entry) => entry.id === selectedTestId);
-
-  if (!test) {
-    goBack();
-    return;
-  }
-
-  app.innerHTML = `
-    <main class="app-page light-page">
-      ${renderTopBar(test.title)}
-
-      <section class="profile-card">
-        <h3>${escapeText(test.title)}</h3>
-        <p class="muted">${escapeText(test.description || "")}</p>
-
-        <form id="takeTestForm" class="test-form">
-          ${test.questions
-            .map(
-              (question, questionIndex) => `
-                <div class="question-card">
-                  <h4>${questionIndex + 1}. ${escapeText(question.question)}</h4>
-
-                  ${question.options
-                    .map(
-                      (option, optionIndex) => `
-                        <label class="answer-option">
-                          <input
-                            type="radio"
-                            name="question_${questionIndex}"
-                            value="${optionIndex}"
-                            required
-                          />
-                          <span>${escapeText(option)}</span>
-                        </label>
-                      `
-                    )
-                    .join("")}
-                </div>
-              `
-            )
-            .join("")}
-
-          <button type="submit" class="primary-btn">
-            Testni yakunlash
-          </button>
-        </form>
-      </section>
-    </main>
-  `;
-
-  attachTopBackButton();
-
-  document.getElementById("takeTestForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    let correct = 0;
-
-    test.questions.forEach((question, questionIndex) => {
-      const answer = Number(formData.get(`question_${questionIndex}`));
-
-      if (answer === Number(question.correctIndex)) {
-        correct += 1;
-      }
-    });
-
-    createTestResult({
-      test,
-      correct,
-      total: test.questions.length
-    });
-
-    showToast(`Natija: ${correct}/${test.questions.length}`);
-    navigate("testResults", { replace: true });
   });
 }
 
@@ -3029,7 +3260,7 @@ function renderProfile() {
   });
 }
 
-/* Announcements page */
+/* Announcements */
 
 function renderAnnouncements() {
   const announcements = loadAnnouncements();
