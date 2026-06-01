@@ -452,10 +452,7 @@ function loadContent() {
     }
 
     const lessons = saved[directionKey]?.lessons?.materials || [];
-
-    const hasOnlyOldIntro =
-      lessons.length === 1 &&
-      lessons[0]?.id === "lesson_intro";
+    const hasOnlyOldIntro = lessons.length === 1 && lessons[0]?.id === "lesson_intro";
 
     const hasNoNewLessons =
       !lessons.some((item) => item.id === "lesson_medicines") &&
@@ -494,8 +491,7 @@ function saveAnnouncements(announcements) {
 }
 
 function getUnreadAnnouncementsCount() {
-  const announcements = loadAnnouncements();
-  return announcements.length;
+  return loadAnnouncements().length;
 }
 
 function createAnnouncement({ title, text }) {
@@ -617,7 +613,7 @@ function searchMedicines(query) {
   });
 }
 
-/* Test results and pharmacist rating */
+/* Test results and rating */
 
 function loadTestResults() {
   return JSON.parse(localStorage.getItem(STORAGE_KEYS.testResults) || "[]");
@@ -964,17 +960,13 @@ function renderRegistration() {
       firstName: formData.get("firstName").trim(),
       lastName: formData.get("lastName").trim(),
       birthDate: formData.get("birthDate"),
-
       direction: selectedDirection,
       lastDirection: selectedDirection,
       directions: [selectedDirection],
-
       photo: "",
       photoPosition: "center center",
-
       stars: 0,
       pharmacistCategory: getPharmacistCategory(0),
-
       gender: "",
       documentType: "",
       documentNumber: "",
@@ -984,7 +976,6 @@ function renderRegistration() {
     };
 
     saveCurrentUser(userData);
-
     historyStack = historyStack.filter((screen) => screen !== "registration");
 
     if (tg?.HapticFeedback) {
@@ -1019,14 +1010,14 @@ function renderMainMenu() {
     <main class="app-page light-page">
       ${renderTopBar(direction.title)}
 
-      <section class="top-banner universal-main-banner">
-        <div class="universal-logo-wrap">
-          <img src="${MAIN_LOGO}" alt="Dehkon" class="universal-main-logo" />
+      <section class="top-banner" style="background:${direction.color}">
+        <div>
+          <img src="${direction.logo}" alt="${direction.title}" class="banner-logo" />
+          <p>${direction.subtitle}</p>
         </div>
 
-        <div class="universal-banner-text">
-          <h3>${escapeText(direction.title)}</h3>
-          <p>${escapeText(direction.subtitle)}</p>
+        <div class="banner-illustration">
+          <img src="${MAIN_LOGO}" alt="Dehkon" class="animated-side-logo" />
         </div>
       </section>
 
@@ -1084,7 +1075,6 @@ function renderMainMenu() {
 function renderMenuDetail() {
   const item = menuItems.find((menuItem) => menuItem.id === selectedMenuItemId) || menuItems[0];
   const sectionContent = getCurrentSectionContent();
-  const direction = directions[getSelectedDirection()];
 
   if (tg) {
     tg.setHeaderColor("#ffffff");
@@ -1092,7 +1082,7 @@ function renderMenuDetail() {
   }
 
   if (selectedMenuItemId === "tests") {
-    renderTestsPage(item, sectionContent, direction);
+    renderTestsPage(item, sectionContent);
     return;
   }
 
@@ -1209,9 +1199,7 @@ function renderMenuDetail() {
       });
     });
   }
-}
-
-/* Medicine */
+}/* Medicine */
 
 function renderMedicineRows(medicines) {
   if (!medicines.length) {
@@ -1970,7 +1958,7 @@ function renderPharmacistRatingPage() {
 
 /* Tests */
 
-function renderTestsPage(item, sectionContent, direction) {
+function renderTestsPage(item, sectionContent) {
   const tests = sectionContent?.tests || [];
 
   app.innerHTML = `
