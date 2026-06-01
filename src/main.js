@@ -1199,7 +1199,9 @@ function renderMenuDetail() {
       });
     });
   }
-}/* Medicine */
+}
+
+/* Medicine */
 
 function renderMedicineRows(medicines) {
   if (!medicines.length) {
@@ -3032,30 +3034,32 @@ function renderProfile() {
     <main class="app-page light-page">
       ${renderTopBar("Profilim")}
 
-      <section class="profile-header">
-        <div class="profile-photo-wrap" id="profilePhotoPreview">
+      <section class="profile-header profile-header-clean">
+        <div class="profile-photo-wrap profile-photo-wrap-large" id="profilePhotoPreview">
           ${
             profilePhoto
               ? `
                 <img
                   src="${profilePhoto}"
                   alt="Profile photo"
-                  class="profile-photo"
+                  class="profile-photo profile-photo-large"
                   style="object-position: ${escapeText(selectedProfilePhotoPosition)};"
                 />
               `
-              : `<div class="profile-avatar">${getInitials(currentUser.firstName, currentUser.lastName)}</div>`
+              : `<div class="profile-avatar profile-avatar-large">${getInitials(currentUser.firstName, currentUser.lastName)}</div>`
           }
         </div>
 
-        <div>
+        <div class="profile-main-info">
           <h2>${escapeText(currentUser.firstName)} ${escapeText(currentUser.lastName)}</h2>
-          <p>Telegram ID: ${escapeText(currentUser.telegramId)}</p>
-          ${currentUser.username ? `<p>@${escapeText(currentUser.username)}</p>` : ""}
-          <p>Bo‘limlar: ${escapeText(getUserDirectionsLabel(currentUser))}</p>
-          <p>Yulduzlar: ${getStarsText(currentUser.stars)}</p>
-          <p>Kategoriya: ${escapeText(getPharmacistCategory(currentUser.stars))}</p>
-          <p>Umumiy ball: ${getUserTotalScore(currentUser.telegramId)}</p>
+
+          <div class="profile-rating-row">
+            <span class="profile-stars">${getStarsText(currentUser.stars)}</span>
+          </div>
+
+          <p class="profile-category-text">
+            ${escapeText(getPharmacistCategory(currentUser.stars))}
+          </p>
         </div>
       </section>
 
@@ -3063,27 +3067,17 @@ function renderProfile() {
         <h3>Profil ma’lumotlari</h3>
 
         <form id="profileForm" class="form">
-          <label>
-            Profil rasmi
-            <input
-              type="file"
-              name="photo"
-              id="profilePhotoInput"
-              accept="image/*"
-            />
-          </label>
+          <input
+            type="file"
+            name="photo"
+            id="profilePhotoInput"
+            accept="image/*"
+            class="hidden-file-input"
+          />
 
-          <div class="photo-position-box">
-            <p>Rasm markazini tanlang:</p>
-
-            <div class="photo-position-grid">
-              <button type="button" data-photo-position="center 35%">Yuqoriroq</button>
-              <button type="button" data-photo-position="center center">Markaz</button>
-              <button type="button" data-photo-position="center 65%">Pastroq</button>
-              <button type="button" data-photo-position="35% center">Chaproq</button>
-              <button type="button" data-photo-position="65% center">O‘ngroq</button>
-            </div>
-          </div>
+          <button type="button" id="changeProfilePhotoBtn" class="change-photo-btn">
+            📷 Rasmni o‘zgartirish
+          </button>
 
           <label>
             Ism
@@ -3125,25 +3119,6 @@ function renderProfile() {
           </label>
 
           <label>
-            Hujjat turi
-            <select name="documentType">
-              <option value="">Tanlang</option>
-              <option value="id_card" ${currentUser.documentType === "id_card" ? "selected" : ""}>ID karta</option>
-              <option value="passport" ${currentUser.documentType === "passport" ? "selected" : ""}>Pasport</option>
-            </select>
-          </label>
-
-          <label>
-            ID karta yoki pasport raqami
-            <input
-              type="text"
-              name="documentNumber"
-              placeholder="AA1234567"
-              value="${escapeText(currentUser.documentNumber || "")}"
-            />
-          </label>
-
-          <label>
             PINFL
             <input
               type="text"
@@ -3154,7 +3129,7 @@ function renderProfile() {
             />
           </label>
 
-          <div class="two-columns">
+          <div class="work-time-grid">
             <label>
               Ish boshlanishi
               <input
@@ -3187,7 +3162,14 @@ function renderProfile() {
   attachTopBackButton();
   attachBottomNavEvents();
 
-  document.getElementById("profilePhotoInput").addEventListener("change", async (event) => {
+  const profilePhotoInput = document.getElementById("profilePhotoInput");
+  const changeProfilePhotoBtn = document.getElementById("changeProfilePhotoBtn");
+
+  changeProfilePhotoBtn.addEventListener("click", () => {
+    profilePhotoInput.click();
+  });
+
+  profilePhotoInput.addEventListener("change", async (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -3196,24 +3178,7 @@ function renderProfile() {
     selectedProfilePhotoPosition = "center center";
 
     updateProfilePhotoPreview(selectedProfilePhotoData, selectedProfilePhotoPosition);
-    updatePhotoPositionButtons();
   });
-
-  document.querySelectorAll("[data-photo-position]").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedProfilePhotoPosition = button.dataset.photoPosition;
-
-      const photo = selectedProfilePhotoData || currentUser.photo || "";
-
-      if (photo) {
-        updateProfilePhotoPreview(photo, selectedProfilePhotoPosition);
-      }
-
-      updatePhotoPositionButtons();
-    });
-  });
-
-  updatePhotoPositionButtons();
 
   document.getElementById("profileForm").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -3226,8 +3191,6 @@ function renderProfile() {
       lastName: formData.get("lastName").trim(),
       birthDate: formData.get("birthDate"),
       gender: formData.get("gender"),
-      documentType: formData.get("documentType"),
-      documentNumber: formData.get("documentNumber").trim(),
       pinfl: formData.get("pinfl").trim(),
       workFrom: formData.get("workFrom"),
       workTo: formData.get("workTo"),
@@ -3404,7 +3367,7 @@ function updateProfilePhotoPreview(photo, position = "center center") {
     <img
       src="${photo}"
       alt="Profile photo"
-      class="profile-photo"
+      class="profile-photo profile-photo-large"
       style="object-position: ${escapeText(position)};"
     />
   `;
