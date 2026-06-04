@@ -19,9 +19,9 @@ img{max-width:100%;display:block}
 .group-logo-scene{width:260px;height:185px;margin:0 auto 8px;position:relative;display:flex;align-items:flex-end;justify-content:center}
 .group-arc-text{position:absolute;left:50%;top:0;width:260px;height:130px;transform:translateX(-50%);overflow:visible;filter:drop-shadow(0 0 10px rgba(255,116,23,.85));pointer-events:none}
 .group-arc-text text,.group-arc-text textPath{fill:#ff7417!important}
-.logo-avatar-wrapper{width:500px;height:155px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center}
+.logo-avatar-wrapper{width:650px;height:155px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center}
 .logo-avatar-wrapper .avatar-glow{display:none!important}
-.main-landing-logo{width:500px!important;height:500px!important;padding:0!important;object-fit:contain!important;background:transparent!important;border:none!important;border-radius:0!important;box-shadow:none!important;animation:landingLogoSpin 7s infinite linear;transform-style:preserve-3d}
+.main-landing-logo{width:650px!important;height:650px!important;padding:0!important;object-fit:contain!important;background:transparent!important;border:none!important;border-radius:0!important;box-shadow:none!important;animation:landingLogoSpin 7s infinite linear;transform-style:preserve-3d}
 @keyframes landingLogoSpin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
 
 .direction-buttons{margin-top:56px;display:flex;flex-direction:column;gap:18px}
