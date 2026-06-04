@@ -9,21 +9,23 @@ img{max-width:100%;display:block}
 .landing-page{width:100%;min-height:100vh;padding:36px 24px 28px;background:radial-gradient(circle at top,rgba(37,116,255,.32),transparent 32%),linear-gradient(180deg,#071832 0%,#020713 100%);position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column}
 .landing-page::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.16) 1px,transparent 1px);background-size:18px 18px;opacity:.35;pointer-events:none}
 .hero,.direction-buttons,.home-bottom-slogan{position:relative;z-index:2}
-.hero{text-align:center;padding-top:8px}
+.hero{text-align:center;padding-top:4px}
 .avatar-wrapper{width:132px;height:132px;margin:0 auto 26px;position:relative;display:flex;align-items:center;justify-content:center}
 .avatar-glow{position:absolute;width:155px;height:155px;border-radius:50%;background:radial-gradient(circle,rgba(25,121,255,.72),transparent 68%);filter:blur(4px);animation:pulse 2.8s infinite ease-in-out}
 .avatar{width:124px;height:124px;border-radius:50%;object-fit:cover;border:5px solid #3b7cff;box-shadow:0 0 0 8px rgba(59,124,255,.16),0 12px 32px rgba(0,0,0,.45);position:relative;z-index:2}
 .hero h1{font-size:37px;line-height:1.14;font-weight:800;letter-spacing:-1.2px;margin-bottom:0}
 .hero h1 span{color:#3176ff}
 
-.group-logo-scene{width:240px;height:178px;margin:0 auto 8px;position:relative;display:flex;align-items:flex-end;justify-content:center}
-.group-arc-text{position:absolute;left:50%;top:0;width:240px;height:130px;transform:translateX(-50%);overflow:visible;filter:drop-shadow(0 0 8px rgba(255,116,23,.65)) drop-shadow(0 0 12px rgba(47,67,163,.45));pointer-events:none}
-.logo-avatar-wrapper{width:132px;height:132px;margin:0 auto}
-.main-landing-logo{width:124px;height:124px;padding:18px;object-fit:contain;background:rgba(255,255,255,.05);animation:landingLogoSpin 7s infinite linear;transform-style:preserve-3d}
+.group-logo-scene{width:260px;height:185px;margin:0 auto 8px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+.group-arc-text{position:absolute;left:50%;top:0;width:260px;height:130px;transform:translateX(-50%);overflow:visible;filter:drop-shadow(0 0 10px rgba(255,116,23,.85));pointer-events:none}
+.group-arc-text text,.group-arc-text textPath{fill:#ff7417!important}
+.logo-avatar-wrapper{width:155px;height:155px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:center}
+.logo-avatar-wrapper .avatar-glow{display:none!important}
+.main-landing-logo{width:155px!important;height:155px!important;padding:0!important;object-fit:contain!important;background:transparent!important;border:none!important;border-radius:0!important;box-shadow:none!important;animation:landingLogoSpin 7s infinite linear;transform-style:preserve-3d}
 @keyframes landingLogoSpin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
 
 .direction-buttons{margin-top:56px;display:flex;flex-direction:column;gap:18px}
-.direction-buttons-raised{margin-top:38px}
+.direction-buttons-raised{margin-top:34px}
 .direction-btn{width:100%;min-height:92px;border-radius:28px;padding:18px 24px;display:flex;align-items:center;justify-content:center;box-shadow:0 16px 32px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .16s ease,filter .16s ease}
 .direction-btn:active{transform:scale(.97);filter:brightness(.94)}
 .direction-btn img{width:76%;max-width:320px;max-height:62px;object-fit:contain}
@@ -333,13 +335,13 @@ img{max-width:100%;display:block}
 @media(max-width:390px){
 #app{max-width:100%}
 .landing-page{padding-left:18px;padding-right:18px}
-.hero{padding-top:4px}
+.hero{padding-top:0}
 .hero h1{font-size:33px}
 .subtitle{font-size:16px}
-.group-logo-scene{width:220px;height:164px;margin-bottom:6px}
-.group-arc-text{width:220px;height:122px}
-.logo-avatar-wrapper{width:124px;height:124px}
-.main-landing-logo{width:116px;height:116px;padding:16px}
+.group-logo-scene{width:240px;height:172px;margin-bottom:6px}
+.group-arc-text{width:240px;height:122px}
+.logo-avatar-wrapper{width:145px;height:145px}
+.main-landing-logo{width:145px!important;height:145px!important;padding:0!important;border:none!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
 .color-slogan{font-size:18px}
 .direction-buttons{margin-top:42px}
 .direction-buttons-raised{margin-top:30px}

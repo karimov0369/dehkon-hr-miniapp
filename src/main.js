@@ -840,7 +840,7 @@ function renderHome() {
             </defs>
 
             <text
-              fill="url(#rainbowTextGradient)"
+              fill="#ff7417"
               font-size="22"
               font-weight="900"
               letter-spacing="3"
