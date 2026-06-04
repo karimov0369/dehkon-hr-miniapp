@@ -886,7 +886,7 @@ function renderHome() {
         <p class="subtitle color-slogan">
           <span class="slogan-biz">BIZ</span>
           <span class="slogan-har-kuni">HAR KUNI</span>
-          <span class="slogan-ozgaramiz">OZGARAMIZ</span>
+          <span class="slogan-ozgaramiz">O'ZGARAMIZ</span>
         </p>
 
         <div class="divider"></div>
