@@ -823,9 +823,43 @@ function renderHome() {
   app.innerHTML = `
     <main class="landing-page">
       <section class="hero">
-        <div class="avatar-wrapper">
-          <div class="avatar-glow"></div>
-          <img src="${BASE_URL}assets/hr.jpg" alt="Dehkon HR" class="avatar" />
+        <div class="group-logo-scene">
+          <svg class="group-arc-text" viewBox="0 0 240 130" aria-hidden="true">
+            <defs>
+              <linearGradient id="rainbowTextGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff7417" />
+                <stop offset="35%" stop-color="#ffd500" />
+                <stop offset="65%" stop-color="#2f43a3" />
+                <stop offset="100%" stop-color="#ff0019" />
+              </linearGradient>
+
+              <path
+                id="groupArcPath"
+                d="M 36 102 A 84 84 0 0 1 204 102"
+              />
+            </defs>
+
+            <text
+              fill="url(#rainbowTextGradient)"
+              font-size="22"
+              font-weight="900"
+              letter-spacing="3"
+            >
+              <textPath href="#groupArcPath" startOffset="50%" text-anchor="middle">
+                DEHKON GROUP
+              </textPath>
+            </text>
+          </svg>
+
+          <div class="avatar-wrapper logo-avatar-wrapper">
+            <div class="avatar-glow"></div>
+
+            <img
+              src="${MAIN_LOGO}"
+              alt="Dehkon Group"
+              class="avatar main-landing-logo"
+            />
+          </div>
         </div>
 
         <h1>
@@ -849,8 +883,10 @@ function renderHome() {
       </section>
 
       <section class="home-bottom-slogan">
-        <p class="subtitle">
-          Bilim, intizom va natija — muvaffaqiyat kaliti!
+        <p class="subtitle color-slogan">
+          <span class="slogan-biz">BIZ</span>
+          <span class="slogan-har-kuni">HAR KUNI</span>
+          <span class="slogan-ozgaramiz">OZGARAMIZ</span>
         </p>
 
         <div class="divider"></div>
